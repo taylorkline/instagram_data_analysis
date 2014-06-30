@@ -33,9 +33,11 @@ for media in theLinqPlaces:
     print media
     print dir(media)
     print media.link
+    print dir(media.user)
+    print media.user.username
     outputFile.write("<a href=\"" + media.link + "\">")
     print media.images['standard_resolution'].url # media.images is a dictionary
-    outputFile.write("<img src=\"" + media.images['standard_resolution'].url + "\"></a>\n")
+    outputFile.write("<img src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " + media.user.username + "\"></a>\n")
     for comment in media.comments: # media.comments is an array, iterate through and print out each comment
         print "Image comment: " + comment.text
 
@@ -46,10 +48,11 @@ theLinqPlaces = api.location_search(lat=36.1,lng=-115.1, distance=50)
 # print theLinqPlaces
 for eachLocation in theLinqPlaces:
     linqRecentMedia = api.location_recent_media(location_id=eachLocation.id)
+    print linqRecentMedia
     #print linqRecentMedia # prints id of each media
     for media in linqRecentMedia[0]: #first element of tuple contains media
         outputFile.write("<a href=\"" + media.link + "\">")
-        outputFile.write("<img src=\"" + media.images['standard_resolution'].url + "\"></a>\n")
+        outputFile.write("<img src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " + media.user.username + "\"></a>\n")
 # TODO: try a location that has so many images it requires pagination
 
 webbrowser.open_new_tab("file://" + outputFilepath + "/" + outputFilename)
