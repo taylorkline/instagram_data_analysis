@@ -30,9 +30,9 @@ api = InstagramAPI(access_token=access_token)
 # Creates the header for the webpage
 def createHTMLTemplate():
     outputFile.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">"
-           + "<head>\n<style type=\"text/css\">\nbody {\n\tbackground-color:  rgb(0,162,232);\n\t"
-           + "font-family: 'Arial',Helvetica, Sans-Serif;\n\tcolor: white;\n}\n</style>"
-           + "\n<title>Instagram Data Analysis</title>\n</head>\n<body>\n"
+            + "<head>\n<style type=\"text/css\">\nbody {\n\tbackground-color: DarkSlateGray;\n\t"
+           + "font-family: 'Arial',Helvetica, Sans-Serif;\n\tcolor: white;\n\ttext-align: center;"
+           + "\n}\n</style>\n<title>Instagram Data Analysis</title>\n</head>\n<body>\n"
            + "<h1>Images from " + str(LATITUDE) + "/" + str(LONGITUDE) + "</h1>\n"
            + "<h2>(click thumbnail for direct Instagram page)</h2>")
 
@@ -43,7 +43,7 @@ def addImageHTML(media):
             + str(media.created_time) + "\n" + "at " + str(media.location.point) + " and received " \
             + str(media.like_count) + " likes.\n"
     outputFile.write("<a href=\"" + media.link + "\">")
-    outputFile.write("<img style=\"height:auto; width:auto; max-width:300px; max-height:300px;\""
+    outputFile.write("<img style=\"height:auto; width:auto; max-width:300px; max-height:300px;padding: 10px;\""
                 + "src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " 
                 + media.user.username + "\" alt=\"" + media.user.username + "\"></a>\n")
 
