@@ -4,4 +4,4 @@ Uses the [Instagram-Python API](https://github.com/Instagram/python-instagram) t
 
 Screenshot
 ==========
-![Screenshot of application](/../screenshots/instagramToHTML-screenshot.png?raw=true "Screenshot of application")
+![Screenshot of application](/../screenshots/instagramToHTML-screenshot.jpg?raw=true "Screenshot of application")
