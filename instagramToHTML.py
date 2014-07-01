@@ -23,14 +23,14 @@ access_token = keyFile.readline().rstrip()
 LATITUDE=36.117590
 LONGITUDE=-115.171589
 DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
-MAXRESULTS=500
+MAXRESULTS=5
 
 api = InstagramAPI(access_token=access_token)
 
 # Given a media object, writes out to the webpage
 def addImageHTML(media):
         outputFile.write("<a href=\"" + media.link + "\">")
-        outputFile.write("<img src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " + media.user.username + "\"></a>\n")
+        outputFile.write("<img style=\"height:auto; width:auto; max-width:300px; max-height:300px;\" src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " + media.user.username + "\" alt=\"" + media.user.username + "\"></a>\n")
 
 # Displays links of all photos at The Linq and embeds in html
 theLinqPlaces = api.media_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)

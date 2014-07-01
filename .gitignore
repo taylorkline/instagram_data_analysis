@@ -1,6 +1,9 @@
 # KEYS file
 keys
 
+#output file
+*.html
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
