@@ -27,10 +27,21 @@ MAXRESULTS=5
 
 api = InstagramAPI(access_token=access_token)
 
+# Creates the header for the webpage
+def createHTMLTemplate():
+    outputFile.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">"
+           + "<head>\n<style type=\"text/css\">\nbody {\n\tbackground-color:  rgb(0,162,232);\n\t"
+           + "font-family: 'Arial',Helvetica, Sans-Serif;\n\tcolor: white;\n}\n</style>"
+           + "\n<title>Instagram Data Analysis</title>\n</head>\n<body>\n")
+
 # Given a media object, writes out to the webpage
 def addImageHTML(media):
-        outputFile.write("<a href=\"" + media.link + "\">")
-        outputFile.write("<img style=\"height:auto; width:auto; max-width:300px; max-height:300px;\" src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " + media.user.username + "\" alt=\"" + media.user.username + "\"></a>\n")
+    outputFile.write("<a href=\"" + media.link + "\">")
+    outputFile.write("<img style=\"height:auto; width:auto; max-width:300px; max-height:300px;\""
+                + "src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " 
+                + media.user.username + "\" alt=\"" + media.user.username + "\"></a>\n")
+
+createHTMLTemplate()
 
 # Displays links of all photos at The Linq and embeds in html
 theLinqPlaces = api.media_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)
@@ -49,7 +60,7 @@ for media in theLinqPlaces:
 
 # Display photos of theLinq and nearby locations
 # Not as useful as first search
-outputFile.write("<br><h1>Second Search:<h1><br>\n")
+outputFile.write("<br><h1>Second Search:</h1><br>\n")
 theLinqPlaces = api.location_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)
 # print theLinqPlaces
 for eachLocation in theLinqPlaces:
@@ -58,4 +69,5 @@ for eachLocation in theLinqPlaces:
     for media in linqRecentMedia[0]: #first element of tuple contains media
         addImageHTML(media)
 
+outputFile.write("</body>\n</html>")
 webbrowser.open_new_tab("file://" + outputFilepath + "/" + outputFilename)
