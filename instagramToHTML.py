@@ -23,7 +23,7 @@ access_token = keyFile.readline().rstrip()
 LATITUDE=36.117590
 LONGITUDE=-115.171589
 DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
-MAXRESULTS=5
+MAXRESULTS=50
 
 api = InstagramAPI(access_token=access_token)
 
@@ -32,10 +32,16 @@ def createHTMLTemplate():
     outputFile.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">"
            + "<head>\n<style type=\"text/css\">\nbody {\n\tbackground-color:  rgb(0,162,232);\n\t"
            + "font-family: 'Arial',Helvetica, Sans-Serif;\n\tcolor: white;\n}\n</style>"
-           + "\n<title>Instagram Data Analysis</title>\n</head>\n<body>\n")
+           + "\n<title>Instagram Data Analysis</title>\n</head>\n<body>\n"
+           + "<h1>Images from " + str(LATITUDE) + "/" + str(LONGITUDE) + "</h1>\n"
+           + "<h2>(click thumbnail for direct Instagram page)</h2>")
 
 # Given a media object, writes out to the webpage
 def addImageHTML(media):
+    #print dir(media)
+    print str(media.user) + " posted this " + media.type + " during date: " \
+            + str(media.created_time) + "\n" + "at " + str(media.location.point) + " and received " \
+            + str(media.like_count) + " likes.\n"
     outputFile.write("<a href=\"" + media.link + "\">")
     outputFile.write("<img style=\"height:auto; width:auto; max-width:300px; max-height:300px;\""
                 + "src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " 
@@ -43,31 +49,26 @@ def addImageHTML(media):
 
 createHTMLTemplate()
 
-# Displays links of all photos at The Linq and embeds in html
-theLinqPlaces = api.media_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)
-print theLinqPlaces
-print
-for media in theLinqPlaces:
-    print media
-    print dir(media)
-    print media.link
-    print dir(media.user)
-    print media.user.username
-    print media.images['standard_resolution'].url # media.images is a dictionary
+# Embed links of all photos at lat/long location in html
+searchResults = api.media_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)
+for media in searchResults:
     addImageHTML(media)
-    for comment in media.comments: # media.comments is an array, iterate through and print out each comment
-        print "Image comment: " + comment.text
 
-# Display photos of theLinq and nearby locations
+"""
+# media.comments is an array, iterate through and print out each comment
+for comment in media.comments: 
+print "Image comment: " + comment.text
+"""
+
+# Embed photos of lat/long and nearby locations
 # Not as useful as first search
-outputFile.write("<br><h1>Second Search:</h1><br>\n")
-theLinqPlaces = api.location_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)
-# print theLinqPlaces
-for eachLocation in theLinqPlaces:
-    linqRecentMedia = api.location_recent_media(location_id=eachLocation.id)
-    #print linqRecentMedia # prints id of each media
-    for media in linqRecentMedia[0]: #first element of tuple contains media
+outputFile.write("<br><h1>Second Search (based on points of interest):</h1><br>\n")
+searchResults = api.location_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)
+for eachLocation in searchResults:
+    recentMedia = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
+    for media in recentMedia[0]: #first element of tuple contains media
         addImageHTML(media)
 
+#Conclude the file and open it
 outputFile.write("</body>\n</html>")
 webbrowser.open_new_tab("file://" + outputFilepath + "/" + outputFilename)
