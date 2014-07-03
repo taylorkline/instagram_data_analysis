@@ -18,8 +18,38 @@ for x in range (0,ACCESS_TOKEN_LINE-1):
 access_token = keyFile.readline().rstrip()
 
 # user specified variables to influence search
-# TODO: Make variables
+USERNAME = 'thelinq'
+MAXUSERS = 800 #maximum number of users to process (in hundreds)
 
 api = InstagramAPI(access_token=access_token)
 
+# accepts a userID and gets the last location of the user based on recent photo, if available
+def getLastLocation(userID):
+    try:
+        userFeed = api.user_recent_media(user_id=userID)[0]
+        #TODO: get lat / long of most recent user feed
+        print userFeed
+    except Exception:
+        print "User is set to private."
 
+# Determines the userID from the username given
+userID = api.user_search(USERNAME)[0].id
+
+# Get each follower of the user
+followers, nextURL = api.user_followed_by(count = 100, user_id=userID) #count max is 100
+totalFollowers = list(followers)
+counter = 0
+
+while nextURL and counter < MAXUSERS: #paginate until there are no more URLs or counter limit is hit
+    followers, nextURL = api.user_followed_by(user_id=userID)
+    totalFollowers += list(followers)
+    counter += 1
+totalFollowers = tuple(totalFollowers) #convert back to immutable tuple
+print "Found " + str(len(totalFollowers)) + " followers."
+# TODO: Counter is off. Why?
+
+# Now that we've got the followers, find their most recent photo
+for eachFollower in totalFollowers:
+    getLastLocation(eachFollower.id)
+
+    #TODO: Print out stats of how many followers there are vs how much location data is available

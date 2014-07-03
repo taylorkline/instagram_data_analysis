@@ -23,7 +23,8 @@ access_token = keyFile.readline().rstrip()
 LATITUDE=36.117590
 LONGITUDE=-115.171589
 DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
-MAXRESULTS=100
+MAXRESULTS=80 #max is 80, no pagination supported
+FOURSQUAREID="52e032d211d2cd200fa5f9d9" # Foursquare ID of landmark
 
 api = InstagramAPI(access_token=access_token)
 
@@ -54,18 +55,27 @@ searchResults = api.media_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, d
 for media in searchResults:
     addImageHTML(media)
 
-"""
-# media.comments is an array, iterate through and print out each comment
-for comment in media.comments: 
-print "Image comment: " + comment.text
-"""
+# Get photos from location based on foursquareID
+outputFile.write("<br><h1>Second Search (based on foursquare ID):</h1><br>\n")
+searchResults = api.location_search(count=MAXRESULTS, foursquare_v2_id=FOURSQUAREID,
+                                distance=DISTANCE)
+
+for eachLocation in searchResults:
+    recentMedia = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
+    #TODO: Pagination of recentMedia
+    print recentMedia
+    for media in recentMedia[0]: #first element of tuple contains media
+        addImageHTML(media)
+print recentMedia
 
 # Embed photos of lat/long and nearby locations
 # Not as useful as first search
-outputFile.write("<br><h1>Second Search (based on points of interest):</h1><br>\n")
+outputFile.write("<br><h1>Third Search (based on points of interest):</h1><br>\n")
 searchResults = api.location_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)
 for eachLocation in searchResults:
     recentMedia = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
+    print recentMedia
+    #TODO: Pagination of recentMedia
     for media in recentMedia[0]: #first element of tuple contains media
         addImageHTML(media)
 
