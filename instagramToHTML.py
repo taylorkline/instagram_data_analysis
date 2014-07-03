@@ -23,7 +23,7 @@ access_token = keyFile.readline().rstrip()
 LATITUDE=36.117590
 LONGITUDE=-115.171589
 DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
-MAXRESULTS=50
+MAXRESULTS=100
 
 api = InstagramAPI(access_token=access_token)
 
