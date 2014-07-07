@@ -19,7 +19,8 @@ access_token = keyFile.readline().rstrip()
 
 # user specified variables to influence search
 USERNAME = 'thelinq'
-MAXUSERS = 800 #maximum number of users to process (in hundreds)
+MAXPAGES = 100 #maximum number of approximately 100-user pages to process
+# Note: This number is approximate, as some pages do not have the full 100 users
 
 api = InstagramAPI(access_token=access_token)
 
@@ -38,15 +39,15 @@ userID = api.user_search(USERNAME)[0].id
 # Get each follower of the user
 followers, nextURL = api.user_followed_by(count = 100, user_id=userID) #count max is 100
 totalFollowers = list(followers)
-counter = 0
+counter = 1
 
-while nextURL and counter < MAXUSERS: #paginate until there are no more URLs or counter limit is hit
-    followers, nextURL = api.user_followed_by(user_id=userID)
+while nextURL and counter < (MAXPAGES): #paginate until there are no more URLs or counter limit is hit
+    followers, nextURL = api.user_followed_by(count = 100, user_id=userID, with_next_url=nextURL)
     totalFollowers += list(followers)
+    print len(totalFollowers)
     counter += 1
 totalFollowers = tuple(totalFollowers) #convert back to immutable tuple
 print "Found " + str(len(totalFollowers)) + " followers."
-# TODO: Counter is off. Why?
 
 # Now that we've got the followers, find their most recent photo
 for eachFollower in totalFollowers:

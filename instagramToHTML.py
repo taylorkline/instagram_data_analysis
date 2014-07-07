@@ -48,6 +48,17 @@ def addImageHTML(media):
                 + "src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " 
                 + media.user.username + "\" alt=\"" + media.user.username + "\"></a>\n")
 
+def findMediaAtLocation(locationResults):
+    for eachLocation in locationResults:
+        recentMedia = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
+        #TODO: Pagination of recentMedia
+        print recentMedia
+        asdf
+        for media in recentMedia[0]: #first element of tuple contains media
+            addImageHTML(media)
+
+
+
 createHTMLTemplate()
 
 # Embed links of all photos at lat/long location in html
@@ -60,24 +71,13 @@ outputFile.write("<br><h1>Second Search (based on foursquare ID):</h1><br>\n")
 searchResults = api.location_search(count=MAXRESULTS, foursquare_v2_id=FOURSQUAREID,
                                 distance=DISTANCE)
 
-for eachLocation in searchResults:
-    recentMedia = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
-    #TODO: Pagination of recentMedia
-    print recentMedia
-    for media in recentMedia[0]: #first element of tuple contains media
-        addImageHTML(media)
-print recentMedia
+findMediaAtLocation(searchResults)
 
 # Embed photos of lat/long and nearby locations
 # Not as useful as first search
 outputFile.write("<br><h1>Third Search (based on points of interest):</h1><br>\n")
 searchResults = api.location_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)
-for eachLocation in searchResults:
-    recentMedia = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
-    print recentMedia
-    #TODO: Pagination of recentMedia
-    for media in recentMedia[0]: #first element of tuple contains media
-        addImageHTML(media)
+findMediaAtLocation(searchResults)
 
 #Conclude the file and open it
 outputFile.write("</body>\n</html>")
