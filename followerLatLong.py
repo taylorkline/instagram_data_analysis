@@ -44,10 +44,10 @@ counter = 1
 while nextURL and counter < (MAXPAGES): #paginate until there are no more URLs or counter limit is hit
     followers, nextURL = api.user_followed_by(count = 100, user_id=userID, with_next_url=nextURL)
     totalFollowers += list(followers)
-    print len(totalFollowers)
     counter += 1
 totalFollowers = tuple(totalFollowers) #convert back to immutable tuple
 print "Found " + str(len(totalFollowers)) + " followers."
+# TODO: Print (out of xxxx followers)
 
 # Now that we've got the followers, find their most recent photo
 for eachFollower in totalFollowers:

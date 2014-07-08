@@ -5,6 +5,7 @@
 from instagram.client import InstagramAPI
 import webbrowser
 import os
+import time #TODO: remove this
 
 # output file to be used for html output and opened in web browser
 outputFilename = 'output.html'
@@ -23,7 +24,9 @@ access_token = keyFile.readline().rstrip()
 LATITUDE=36.117590
 LONGITUDE=-115.171589
 DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
-MAXRESULTS=80 #max is 80, no pagination supported
+# Max number of pictures to find per location search, and per each location
+# for the location search, the max number of results possible is 80
+MAXRESULTS=80 
 FOURSQUAREID="52e032d211d2cd200fa5f9d9" # Foursquare ID of landmark
 
 api = InstagramAPI(access_token=access_token)
@@ -48,13 +51,22 @@ def addImageHTML(media):
                 + "src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " 
                 + media.user.username + "\" alt=\"" + media.user.username + "\"></a>\n")
 
+# Prints out pictures in each location in locationResults
 def findMediaAtLocation(locationResults):
     for eachLocation in locationResults:
-        recentMedia = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
-        #TODO: Pagination of recentMedia
-        print recentMedia
-        asdf
-        for media in recentMedia[0]: #first element of tuple contains media
+
+        print "Finding " + str(MAXRESULTS) + " pictures at " + str(eachLocation)
+
+        recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
+        totalFollowers = recentMedia
+
+        while nextURL and (len(totalFollowers) < MAXRESULTS):
+            recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id, with_next_url=nextURL)
+            totalFollowers += recentMedia
+
+        print str(len(totalFollowers)) + " pictures found at location."
+        time.sleep(2)
+        for media in totalFollowers: #first element of tuple contains media
             addImageHTML(media)
 
 
