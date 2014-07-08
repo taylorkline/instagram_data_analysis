@@ -3,6 +3,7 @@ keys
 
 #output file
 *.html
+*.dat
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
