@@ -3,9 +3,11 @@
 # Creates an html webpage based on Instagram photos at a certain location
 # Setting variables in ALL_CAPS is your responsibility.
 from instagram.client import InstagramAPI
+from geopy.geocoders import GoogleV3
 import webbrowser
 import os
-import time #TODO: remove this
+import sys
+import time
 
 # output file to be used for html output and opened in web browser
 outputFilename = 'output.html'
@@ -20,14 +22,31 @@ for x in range (0,ACCESS_TOKEN_LINE-1):
     keyFile.readline()
 access_token = keyFile.readline().rstrip()
 
+# geolocator variables
+geolocator = GoogleV3()
+
 # user specified variables to influence search
-LATITUDE=36.117590
-LONGITUDE=-115.171589
+DESTINATION="The White House"
 DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
+
 # Max number of pictures to find per location search, and per each location
 # for the location search, the max number of results possible is 80
 MAXRESULTS=80 
-FOURSQUAREID="52e032d211d2cd200fa5f9d9" # Foursquare ID of landmark
+FOURSQUAREID="" # Foursquare ID of landmark (can leave blank to skip search)
+
+try: 
+    address, (latitude, longitude) = geolocator.geocode(DESTINATION)
+except Exception:
+    print "Sorry, but your destination was not able to be found."
+    print ("Please check your internet connection or retry with a new landmark or specific, valid"
+       " address from Google Maps.")
+    time.sleep(2)
+    sys.exit()
+
+print "Begining search for pictures within " + str(DISTANCE) + " meters of destination: "
+print address, latitude, longitude
+print "If this is not correct, please reset the variables in ALL CAPS."
+time.sleep(5)
 
 api = InstagramAPI(access_token=access_token)
 
@@ -37,7 +56,7 @@ def createHTMLTemplate():
             + "<head>\n<style type=\"text/css\">\nbody {\n\tbackground-color: DarkSlateGray;\n\t"
            + "font-family: 'Arial',Helvetica, Sans-Serif;\n\tcolor: white;\n\ttext-align: center;"
            + "\n}\n</style>\n<title>Instagram Data Analysis</title>\n</head>\n<body>\n"
-           + "<h1>Images from " + str(LATITUDE) + "/" + str(LONGITUDE) + "</h1>\n"
+           + "<h1>Images from " + str(DESTINATION) + "</h1>\n"
            + "<h2>(click thumbnail for direct Instagram page)</h2>")
 
 # Given a media object, writes out to the webpage
@@ -55,7 +74,14 @@ def addImageHTML(media):
 def findMediaAtLocation(locationResults):
     for eachLocation in locationResults:
 
-        print "Finding " + str(MAXRESULTS) + " pictures at " + str(eachLocation)
+        # Reverse geocode and inform user
+        latlong = str(eachLocation.point.latitude) + ", " + str(eachLocation.point.longitude)
+        time.sleep(3)
+        try: 
+            address, (latitude, longitude) = geolocator.reverse(latlong)[0]
+        except Exception:
+            address = latlong
+        print "Searching for up to " + str(MAXRESULTS) + " pictures near " + str(address)
 
         recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
         totalFollowers = recentMedia
@@ -74,21 +100,29 @@ def findMediaAtLocation(locationResults):
 createHTMLTemplate()
 
 # Embed links of all photos at lat/long location in html
-searchResults = api.media_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)
+searchResults = api.media_search(count=MAXRESULTS, lat=latitude,lng=longitude, distance=DISTANCE)
 for media in searchResults:
     addImageHTML(media)
 
 # Get photos from location based on foursquareID
-outputFile.write("<br><h1>Second Search (based on foursquare ID):</h1><br>\n")
-searchResults = api.location_search(count=MAXRESULTS, foursquare_v2_id=FOURSQUAREID,
+if FOURSQUAREID: 
+    outputFile.write("<br><h1>Second Search (based on foursquare ID):</h1><br>\n")
+    searchResults = api.location_search(count=MAXRESULTS, foursquare_v2_id=FOURSQUAREID,
                                 distance=DISTANCE)
-
-findMediaAtLocation(searchResults)
+    findMediaAtLocation(searchResults)
+if not FOURSQUAREID:
+    print "No FOURSQUAREID given - skipping search by Foursquare location"
+    time.sleep(4)
 
 # Embed photos of lat/long and nearby locations
 # Not as useful as first search
-outputFile.write("<br><h1>Third Search (based on points of interest):</h1><br>\n")
-searchResults = api.location_search(count=MAXRESULTS, lat=LATITUDE,lng=LONGITUDE, distance=DISTANCE)
+if FOURSQUAREID: 
+    outputFile.write("<br><h1>Third Search (based on points of interest):</h1><br>\n")
+if not FOURSQUAREID: 
+    outputFile.write("<br><h1>Second Search (based on points of interest):</h1><br>\n")
+searchResults = api.location_search(count=MAXRESULTS, lat=latitude,lng=longitude, distance=DISTANCE)
+print "Found " + str(len(searchResults)) + " nearby landmarks to check for pictures near."
+# TODO: Don't search more than, say, 10 nearby locations
 findMediaAtLocation(searchResults)
 
 #Conclude the file and open it

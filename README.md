@@ -5,7 +5,7 @@ Uses the [Instagram-Python API](https://github.com/Instagram/python-instagram) t
 Dependencies
 =============
 All dependencies are available via `pip install` and include:
-`python-instagram`
+`python-instagram` with a valid Instagram API key placed in a file called "keys"
 `geopy`
 
 Screenshot
