@@ -79,7 +79,7 @@ def findMediaAtLocation(locationResults):
 
         # Reverse geocode and inform user
         latlong = str(eachLocation.point.latitude) + ", " + str(eachLocation.point.longitude)
-        time.sleep(3)
+        time.sleep(4)
         try: 
             address, (latitude, longitude) = geolocator.reverse(latlong)[0]
         except Exception:
@@ -92,9 +92,10 @@ def findMediaAtLocation(locationResults):
         while nextURL and (len(totalFollowers) < PERLOCATION):
             recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id, with_next_url=nextURL)
             totalFollowers += recentMedia
+            time.sleep(2)
 
         print str(len(totalFollowers)) + " pictures found at location."
-        time.sleep(2)
+        time.sleep(4)
         for media in totalFollowers: #first element of tuple contains media
             addImageHTML(media)
 
