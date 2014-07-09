@@ -65,13 +65,14 @@ def createHTMLTemplate():
 # Given a media object, writes out to the webpage
 def addImageHTML(media):
     #print dir(media)
-    print str(media.user) + " posted this " + media.type + " during date: " \
-            + str(media.created_time) + "\n" + "at " + str(media.location.point) + " and received " \
-            + str(media.like_count) + " likes.\n"
+    print (str(media.user) + " posted this " + media.type + " during date: " \
+            + str(media.created_time) + "\n" + "at " + str(media.location.point) + 
+            " and received " + str(media.like_count) + " likes.\n")
     outputFile.write("<a href=\"" + media.link + "\">")
     outputFile.write("<img style=\"height:auto; width:auto; max-width:300px; max-height:300px;padding: 10px;\""
                 + "src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " 
                 + media.user.username + "\" alt=\"" + media.user.username + "\"></a>\n")
+    time.sleep(1)
 
 # Prints out pictures in each location in locationResults
 def findMediaAtLocation(locationResults):
@@ -79,7 +80,6 @@ def findMediaAtLocation(locationResults):
 
         # Reverse geocode and inform user
         latlong = str(eachLocation.point.latitude) + ", " + str(eachLocation.point.longitude)
-        time.sleep(4)
         try: 
             address, (latitude, longitude) = geolocator.reverse(latlong)[0]
         except Exception:
@@ -88,14 +88,16 @@ def findMediaAtLocation(locationResults):
 
         recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
         totalFollowers = recentMedia
+        time.sleep(1)
 
         while nextURL and (len(totalFollowers) < PERLOCATION):
-            recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id, with_next_url=nextURL)
+            recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS,
+                    location_id=eachLocation.id, with_next_url=nextURL)
             totalFollowers += recentMedia
-            time.sleep(2)
+            time.sleep(1)
 
         print str(len(totalFollowers)) + " pictures found at location."
-        time.sleep(4)
+        time.sleep(1)
         for media in totalFollowers: #first element of tuple contains media
             addImageHTML(media)
 
@@ -116,7 +118,7 @@ if FOURSQUAREID:
     findMediaAtLocation(searchResults)
 if not FOURSQUAREID:
     print "No FOURSQUAREID given - skipping search by Foursquare location"
-    time.sleep(4)
+    time.sleep(3)
 
 # Embed photos of lat/long and nearby locations
 # Not as useful as first search
@@ -126,7 +128,7 @@ if not FOURSQUAREID:
     outputFile.write("<br><h1>Second Search (based on points of interest):</h1><br>\n")
 searchResults = api.location_search(count=MAXRESULTS, lat=latitude,lng=longitude, distance=DISTANCE)
 print "Found " + str(len(searchResults)) + " nearby landmarks to check for pictures near."
-# TODO: Don't search more than, say, 10 nearby locations
+# TODO: Don't search more than, say, 10 nearby locations?
 findMediaAtLocation(searchResults)
 
 #Conclude the file and open it
