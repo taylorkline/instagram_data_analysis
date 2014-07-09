@@ -15,7 +15,7 @@ outputFile = open(outputFilename, 'w')
 outputFilepath = os.path.dirname(os.path.realpath(__file__))
 
 # reads access token from specified line in keyFile
-ACCESS_TOKEN_LINE=6
+ACCESS_TOKEN_LINE=1
 keyFilename = 'keys'
 keyFile = open(keyFilename, 'r')
 for x in range (0,ACCESS_TOKEN_LINE-1):
@@ -29,9 +29,12 @@ geolocator = GoogleV3()
 DESTINATION="The White House"
 DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
 
-# Max number of pictures to find per location search, and per each location
-# for the location search, the max number of results possible is 80
+# Max number of pictures to find at specific destination
+# the max number of results possible is 80
 MAXRESULTS=80 
+# Number of nearby locations to find and how many recent pictures to look for
+# Keep this one low or risk rate limiting
+PERLOCATION=3
 FOURSQUAREID="" # Foursquare ID of landmark (can leave blank to skip search)
 
 try: 
@@ -81,12 +84,12 @@ def findMediaAtLocation(locationResults):
             address, (latitude, longitude) = geolocator.reverse(latlong)[0]
         except Exception:
             address = latlong
-        print "Searching for up to " + str(MAXRESULTS) + " pictures near " + str(address)
+        print "Searching for up to " + str(PERLOCATION) + " pictures near " + str(address)
 
         recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
         totalFollowers = recentMedia
 
-        while nextURL and (len(totalFollowers) < MAXRESULTS):
+        while nextURL and (len(totalFollowers) < PERLOCATION):
             recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id, with_next_url=nextURL)
             totalFollowers += recentMedia
 
