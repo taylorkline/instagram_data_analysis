@@ -7,7 +7,7 @@ from geopy.geocoders import GoogleV3
 import webbrowser
 import os
 import sys
-import time
+from time import sleep
 
 # output file to be used for html output and opened in web browser
 outputFilename = 'output.html'
@@ -15,7 +15,7 @@ outputFile = open(outputFilename, 'w')
 outputFilepath = os.path.dirname(os.path.realpath(__file__))
 
 # reads access token from specified line in keyFile
-ACCESS_TOKEN_LINE=1
+ACCESS_TOKEN_LINE=2
 keyFilename = 'keys'
 keyFile = open(keyFilename, 'r')
 for x in range (0,ACCESS_TOKEN_LINE-1):
@@ -43,13 +43,13 @@ except Exception:
     print "Sorry, but your destination was not able to be found."
     print ("Please check your internet connection or retry with a new landmark or specific, valid"
        " address from Google Maps.")
-    time.sleep(2)
+    sleep(2)
     sys.exit()
 
 print "Begining search for pictures within " + str(DISTANCE) + " meters of destination: "
 print address, latitude, longitude
 print "If this is not correct, please reset the variables in ALL CAPS."
-time.sleep(5)
+sleep(5)
 
 api = InstagramAPI(access_token=access_token)
 
@@ -66,13 +66,13 @@ def createHTMLTemplate():
 def addImageHTML(media):
     #print dir(media)
     print (str(media.user) + " posted this " + media.type + " during date: " \
-            + str(media.created_time) + "\n" + "at " + str(media.location.point) + 
-            " and received " + str(media.like_count) + " likes.\n")
+            + str(media.created_time) + "\n" + "at " + str(media.location.point) + "."
+            # Hits rate limit: " and received " + str(media.like_count) + " likes.\n")
     outputFile.write("<a href=\"" + media.link + "\">")
     outputFile.write("<img style=\"height:auto; width:auto; max-width:300px; max-height:300px;padding: 10px;\""
                 + "src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " 
                 + media.user.username + "\" alt=\"" + media.user.username + "\"></a>\n")
-    time.sleep(1)
+    sleep(1)
 
 # Prints out pictures in each location in locationResults
 def findMediaAtLocation(locationResults):
@@ -88,16 +88,16 @@ def findMediaAtLocation(locationResults):
 
         recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
         totalFollowers = recentMedia
-        time.sleep(1)
+        sleep(1)
 
         while nextURL and (len(totalFollowers) < PERLOCATION):
             recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS,
                     location_id=eachLocation.id, with_next_url=nextURL)
             totalFollowers += recentMedia
-            time.sleep(1)
+            sleep(1)
 
         print str(len(totalFollowers)) + " pictures found at location."
-        time.sleep(1)
+        sleep(1)
         for media in totalFollowers: #first element of tuple contains media
             addImageHTML(media)
 
@@ -118,7 +118,7 @@ if FOURSQUAREID:
     findMediaAtLocation(searchResults)
 if not FOURSQUAREID:
     print "No FOURSQUAREID given - skipping search by Foursquare location"
-    time.sleep(3)
+    sleep(3)
 
 # Embed photos of lat/long and nearby locations
 # Not as useful as first search
