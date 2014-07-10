@@ -15,7 +15,7 @@ outputFile = open(outputFilename, 'w')
 outputFilepath = os.path.dirname(os.path.realpath(__file__))
 
 # reads access token from specified line in keyFile
-ACCESS_TOKEN_LINE=2
+ACCESS_TOKEN_LINE=1
 keyFilename = 'keys'
 keyFile = open(keyFilename, 'r')
 for x in range (0,ACCESS_TOKEN_LINE-1):
@@ -26,7 +26,7 @@ access_token = keyFile.readline().rstrip()
 geolocator = GoogleV3()
 
 # user specified variables to influence search
-DESTINATION="The White House"
+DESTINATION="3545 S Las Vegas Blvd"
 DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
 
 # Max number of pictures to find at specific destination
@@ -56,7 +56,7 @@ api = InstagramAPI(access_token=access_token)
 # Creates the header for the webpage
 def createHTMLTemplate():
     outputFile.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">"
-            + "<head>\n<style type=\"text/css\">\nbody {\n\tbackground-color: DarkSlateGray;\n\t"
+           + "<head>\n<style type=\"text/css\">\nbody {\n\tbackground-color: DarkSlateGray;\n\t"
            + "font-family: 'Arial',Helvetica, Sans-Serif;\n\tcolor: white;\n\ttext-align: center;"
            + "\n}\n</style>\n<title>Instagram Data Analysis</title>\n</head>\n<body>\n"
            + "<h1>Images from " + str(DESTINATION) + "</h1>\n"
@@ -66,8 +66,8 @@ def createHTMLTemplate():
 def addImageHTML(media):
     #print dir(media)
     print (str(media.user) + " posted this " + media.type + " during date: " \
-            + str(media.created_time) + "\n" + "at " + str(media.location.point) + "."
-            # Hits rate limit: " and received " + str(media.like_count) + " likes.\n")
+            + str(media.created_time) + "\n" + "at " + str(media.location.point)
+            + " and received " + str(media.like_count) + " likes.\n")
     outputFile.write("<a href=\"" + media.link + "\">")
     outputFile.write("<img style=\"height:auto; width:auto; max-width:300px; max-height:300px;padding: 10px;\""
                 + "src=\"" + media.images['standard_resolution'].url + "\" title=\" User: " 
@@ -88,7 +88,7 @@ def findMediaAtLocation(locationResults):
 
         recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
         totalFollowers = recentMedia
-        sleep(1)
+        sleep(2)
 
         while nextURL and (len(totalFollowers) < PERLOCATION):
             recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS,
@@ -97,7 +97,7 @@ def findMediaAtLocation(locationResults):
             sleep(1)
 
         print str(len(totalFollowers)) + " pictures found at location."
-        sleep(1)
+        sleep(2)
         for media in totalFollowers: #first element of tuple contains media
             addImageHTML(media)
 
@@ -118,7 +118,7 @@ if FOURSQUAREID:
     findMediaAtLocation(searchResults)
 if not FOURSQUAREID:
     print "No FOURSQUAREID given - skipping search by Foursquare location"
-    sleep(3)
+    sleep(2)
 
 # Embed photos of lat/long and nearby locations
 # Not as useful as first search
