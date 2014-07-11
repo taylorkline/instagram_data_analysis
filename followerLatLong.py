@@ -36,8 +36,8 @@ def getLastLocation(userID):
         userFeed = api.user_recent_media(user_id=userID)[0]
         publicUsers += 1
         #TODO: get lat / long of most recent user feed
-        #TODO: Get the media search working
-        print media_search(id=userFeed[0])
+        #TODO: Get the media search working (maybe using urllib2?)
+        print userFeed[0]
     except Exception:
         print "User is set to private."
         privateUsers += 1
