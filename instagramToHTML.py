@@ -8,11 +8,7 @@ import webbrowser
 import os
 import sys
 from time import sleep
-
-# output file to be used for html output and opened in web browser
-outputFilename = 'output.html'
-outputFile = open(outputFilename, 'w')
-outputFilepath = os.path.dirname(os.path.realpath(__file__))
+from time import localtime
 
 # reads access token from specified line in keyFile
 ACCESS_TOKEN_LINE=1
@@ -28,6 +24,14 @@ geolocator = GoogleV3()
 # user specified variables to influence search
 DESTINATION="3545 S Las Vegas Blvd"
 DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
+
+# output file to be used for html output and opened in web browser
+# tm_year=2014, tm_mon=7, tm_mday=15, tm_hour=14, tm_min=3, tm_sec=10
+currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
+outputFilename = 'output_' + DESTINATION + '_' + currentTime +  '.html'
+outputFile = open(outputFilename, 'w')
+outputFilepath = os.path.dirname(os.path.realpath(__file__))
+
 
 # Max number of pictures to find at specific destination
 # the max number of results possible is 80
