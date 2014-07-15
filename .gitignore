@@ -2,6 +2,7 @@
 keys
 
 #output file
+LatLongData/
 *.html
 *.data
 

@@ -3,7 +3,9 @@
 # Gathers lat / long info on follwers from their most recently posted picture.
 # Setting variables in ALL_CAPS is your responsibility.
 from instagram.client import InstagramAPI
+from instagram.bind import InstagramAPIError
 import os
+import errno
 from time import sleep
 from time import localtime
 
@@ -18,6 +20,7 @@ access_token = keyFile.readline().rstrip()
 # user specified variables to influence search
 USERNAME = 'thelinq'
 MAXPAGES = 3 #maximum number of approximately 100-user pages to process
+MAXTRIES = 4 #number of pictures to go through on users' timelines to get location
 # Note: This number is approximate, as some pages do not have the full 100 users
 
 # output file to be used for html output and opened in web browser
@@ -52,10 +55,14 @@ def getLastLocation(userID):
         publicUsers += 1
         print api.media(userFeed[0].id).location.point
         #TODO: try checking lat/long of older pictures if [0] doesn't have location
-    except Exception as e:
-        #print e
+    # error if user has whole profile private
+    except InstagramAPIError as e:
         print "User is set to private."
-        privateUsers += 1
+    # error if photo has no lat/long in photo
+    except AttributeError as e:
+        print "User's photo doesn't have lat/long."
+    except IndexError as e:
+        pass
 
 # Determines the userID from the username given
 userID = api.user_search(USERNAME)[0].id
@@ -77,6 +84,8 @@ sleep(4)
 # Now that we've got the followers, find their most recent photo
 for eachFollower in totalFollowers:
     getLastLocation(eachFollower.id)
-print publicUsers + " have location enabled and " + privateUsers + " followers have no location."
+percentage = int(round(float(publicUsers) / len(totalFollowers) * 100))
+print str(publicUsers) + " followers have location enabled (" + str(percentage) + "%) and " \
+        + str(len(totalFollowers) - publicUsers) + " followers have no location."
 
 #TODO: Print out stats of how many followers there are vs how much location data is available
