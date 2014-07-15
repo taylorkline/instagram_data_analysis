@@ -29,16 +29,21 @@ privateUsers = 0
 publicUsers = 0
 
 # accepts a userID and gets the last location of the user based on recent photo, if available
+"""
+Example lat/long search:
+print api.media('762502306767443277_398424740').location.point.latitude
+print api.media('762502306767443277_398424740').location.point.longitude
+"""
 def getLastLocation(userID):
     global privateUsers
     global publicUsers
     try:
         userFeed = api.user_recent_media(user_id=userID)[0]
         publicUsers += 1
-        #TODO: get lat / long of most recent user feed
-        #TODO: Get the media search working (maybe using urllib2?)
-        print userFeed[0]
-    except Exception:
+        print api.media(userFeed[0].id).location.point
+        #TODO: try checking lat/long of older pictures if [0] doesn't have location
+    except Exception as e:
+        #print e
         print "User is set to private."
         privateUsers += 1
 
@@ -57,12 +62,11 @@ while nextURL and counter < (MAXPAGES): #paginate until there are no more URLs o
 totalFollowers = tuple(totalFollowers) #convert back to immutable tuple
 print "Found " + str(len(totalFollowers)) + " followers."
 print "Finding most recent Lat/Long of each follower."
-print api.media('762502306767443277_398424740').location.point.latitude
-print api.media('762502306767443277_398424740').location.point.longitude
 sleep(4)
 
 # Now that we've got the followers, find their most recent photo
 for eachFollower in totalFollowers:
     getLastLocation(eachFollower.id)
+print publicUsers + " have location enabled and " + privateUsers + " followers have no location."
 
 #TODO: Print out stats of how many followers there are vs how much location data is available
