@@ -5,10 +5,7 @@
 from instagram.client import InstagramAPI
 import os
 from time import sleep
-
-# output file to be used for html output and opened in web browser
-outputFilename = 'followers.data'
-outputFile = open(outputFilename, 'w')
+from time import localtime
 
 # reads access token from specified line in keyFile
 ACCESS_TOKEN_LINE=1
@@ -23,8 +20,21 @@ USERNAME = 'thelinq'
 MAXPAGES = 3 #maximum number of approximately 100-user pages to process
 # Note: This number is approximate, as some pages do not have the full 100 users
 
+# output file to be used for html output and opened in web browser
+currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
+outputFilename = 'output_' + USERNAME + '_' + currentTime +  '.dat'
+outputDirectory = os.path.dirname(os.path.realpath(__file__)) + '/LatLongData/'
+try:
+        os.makedirs(outputDirectory)
+except OSError as exception:
+    if exception.errno != errno.EEXIST:
+        raise
+outputFile = open(os.path.join(outputDirectory, outputFilename), 'w')
+
+# initiate the api
 api = InstagramAPI(access_token=access_token)
 
+# track how many users we could get location from
 privateUsers = 0
 publicUsers = 0
 
