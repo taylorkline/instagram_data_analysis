@@ -6,6 +6,7 @@ from instagram.client import InstagramAPI
 from geopy.geocoders import GoogleV3
 import webbrowser
 import os
+import errno
 import sys
 from time import sleep
 from time import localtime
@@ -25,14 +26,6 @@ geolocator = GoogleV3()
 DESTINATION="3545 S Las Vegas Blvd"
 DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
 
-# output file to be used for html output and opened in web browser
-# tm_year=2014, tm_mon=7, tm_mday=15, tm_hour=14, tm_min=3, tm_sec=10
-currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
-outputFilename = 'output_' + DESTINATION + '_' + currentTime +  '.html'
-outputFile = open(outputFilename, 'w')
-outputFilepath = os.path.dirname(os.path.realpath(__file__))
-
-
 # Max number of pictures to find at specific destination
 # the max number of results possible is 80
 MAXRESULTS=80 
@@ -49,6 +42,18 @@ except Exception:
        " address from Google Maps.")
     sleep(2)
     sys.exit()
+
+# output file to be used for html output and opened in web browser
+currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
+outputFilename = 'output_' + DESTINATION + '_' + currentTime +  '.html'
+outputDirectory = os.path.dirname(os.path.realpath(__file__)) + '/html_output/'
+try:
+    os.makedirs(outputDirectory)
+except OSError as exception:
+    if exception.errno != errno.EEXIST:
+        raise
+outputFile = open(os.path.join(outputDirectory, outputFilename), 'w')
+outputFileLocation = outputFile.name
 
 print "Begining search for pictures within " + str(DISTANCE) + " meters of destination: "
 print address, latitude, longitude
@@ -105,8 +110,6 @@ def findMediaAtLocation(locationResults):
         for media in totalFollowers: #first element of tuple contains media
             addImageHTML(media)
 
-
-
 createHTMLTemplate()
 
 # Embed links of all photos at lat/long location in html
@@ -132,9 +135,8 @@ if not FOURSQUAREID:
     outputFile.write("<br><h1>Second Search (based on points of interest):</h1><br>\n")
 searchResults = api.location_search(count=MAXRESULTS, lat=latitude,lng=longitude, distance=DISTANCE)
 print "Found " + str(len(searchResults)) + " nearby landmarks to check for pictures near."
-# TODO: Don't search more than, say, 10 nearby locations?
 findMediaAtLocation(searchResults)
 
 #Conclude the file and open it
 outputFile.write("</body>\n</html>")
-webbrowser.open_new_tab("file://" + outputFilepath + "/" + outputFilename)
+webbrowser.open_new_tab("file://" + outputFileLocation)
