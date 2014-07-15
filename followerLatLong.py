@@ -57,10 +57,9 @@ while nextURL and counter < (MAXPAGES): #paginate until there are no more URLs o
 totalFollowers = tuple(totalFollowers) #convert back to immutable tuple
 print "Found " + str(len(totalFollowers)) + " followers."
 print "Finding most recent Lat/Long of each follower."
-# TODO: See how to get lat/long
-# TODO: See: https://apigee.com/console/instagram?req=%7B%22resource%22%3A%22get_media%22%2C%22params%22%3A%7B%22query%22%3A%7B%7D%2C%22template%22%3A%7B%22id%22%3A%22762502306767443277_398424740%22%7D%2C%22headers%22%3A%7B%7D%2C%22body%22%3A%7B%22attachmentFormat%22%3A%22mime%22%2C%22attachmentContentDisposition%22%3A%22form-data%22%7D%7D%2C%22verb%22%3A%22get%22%7D
-print dir(api.media('762502306767443277_398424740'))
-sleep(2)
+print api.media('762502306767443277_398424740').location.point.latitude
+print api.media('762502306767443277_398424740').location.point.longitude
+sleep(4)
 
 # Now that we've got the followers, find their most recent photo
 for eachFollower in totalFollowers:
