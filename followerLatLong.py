@@ -38,7 +38,6 @@ outputFile = open(os.path.join(outputDirectory, outputFilename), 'w')
 api = InstagramAPI(access_token=access_token)
 
 # track how many users we could get location from
-privateUsers = 0
 publicUsers = 0
 
 # accepts a userID and gets the last location of the user based on recent photo, if available
@@ -48,21 +47,27 @@ print api.media('762502306767443277_398424740').location.point.latitude
 print api.media('762502306767443277_398424740').location.point.longitude
 """
 def getLastLocation(userID):
-    global privateUsers
     global publicUsers
     try:
         userFeed = api.user_recent_media(user_id=userID)[0]
         publicUsers += 1
+        print len(userFeed)
+        #TODO: Begin a while loop with conditions:
+        #indexVariable < len(userFeed) 
+        #keep going until find a media with location
         print api.media(userFeed[0].id).location.point
         #TODO: try checking lat/long of older pictures if [0] doesn't have location
     # error if user has whole profile private
     except InstagramAPIError as e:
         print "User is set to private."
     # error if photo has no lat/long in photo
-    except AttributeError as e:
+    except AttributeError:
         print "User's photo doesn't have lat/long."
-    except IndexError as e:
+    """
+    except IndexError:
+        #TODO: Avoid IndexError with while loop
         pass
+    """
 
 # Determines the userID from the username given
 userID = api.user_search(USERNAME)[0].id
