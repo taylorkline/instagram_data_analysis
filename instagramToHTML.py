@@ -86,29 +86,30 @@ def addImageHTML(media):
 # Prints out pictures in each location in locationResults
 def findMediaAtLocation(locationResults):
     for eachLocation in locationResults:
+        #Inform user of location to be searched
+        print "Searching for up to " + str(PERLOCATION) + " pictures near " + eachLocation.name
 
-        # Reverse geocode and inform user
-        latlong = str(eachLocation.point.latitude) + ", " + str(eachLocation.point.longitude)
-        try: 
-            address, (latitude, longitude) = geolocator.reverse(latlong)[0]
-        except Exception:
-            address = latlong
-        print "Searching for up to " + str(PERLOCATION) + " pictures near " + str(address)
-
-        recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS, location_id=eachLocation.id)
+        recentMedia, nextURL = api.location_recent_media(count=PERLOCATION, location_id=eachLocation.id)
         totalFollowers = recentMedia
         sleep(2)
 
         while nextURL and (len(totalFollowers) < PERLOCATION):
-            recentMedia, nextURL = api.location_recent_media(count=MAXRESULTS,
+            recentMedia, nextURL = api.location_recent_media(count=(PERLOCATION - len(totalFollowers)),
                     location_id=eachLocation.id, with_next_url=nextURL)
             totalFollowers += recentMedia
             sleep(1)
 
+        assert len(totalFollowers) < PERLOCATION
         print str(len(totalFollowers)) + " pictures found at location."
         sleep(2)
-        for media in totalFollowers: #first element of tuple contains media
-            addImageHTML(media)
+
+        if len(totalFollowers) > 0:
+            #Add in a divider for each location.
+            outputFile.write("<br><b>Nearby Location: " + eachLocation.name + ".</b><br>")
+
+            #Print the media to the html code
+            for media in totalFollowers: #first element of tuple contains media
+                addImageHTML(media)
 
 createHTMLTemplate()
 
