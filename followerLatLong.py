@@ -94,7 +94,6 @@ def concludeOutput():
     outputFile.close()
 
 initiateOutput()
-print "Saving lat/long data to file:\n" + outputFile.name
 
 # Determines the userID from the username given
 userID = api.user_search(USERNAME)[0].id
@@ -121,3 +120,5 @@ print str(publicUsers) + " followers have location enabled (" + str(percentage) 
         + str(len(totalFollowers) - publicUsers) + " followers have no location."
 
 concludeOutput()
+
+print "Saving lat/long data to file:\n" + outputFile.name
