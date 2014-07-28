@@ -50,20 +50,24 @@ def getLastLocation(userID):
     global publicUsers
     try:
         userFeed = api.user_recent_media(user_id=userID)[0]
-        publicUsers += 1
-        print len(userFeed)
-        #TODO: Begin a while loop with conditions:
-        #indexVariable < len(userFeed) 
-        #keep going until find a media with location
-        print api.media(userFeed[0].id).location.point
-        #TODO: try checking lat/long of older pictures if [0] doesn't have location
-    # error if user has whole profile private
+        print "\nUser's feed contains: " + str(len(userFeed)) + " Media."
+
+        #Search through a user's feed for location
+        for index in userFeed:
+            print "Checking index of feed: " + str(index)
+            try:
+                print "Found location: " + str(api.media(index.id).location.point)
+                publicUsers += 1
+                break
+                #TODO: Stop if we find a location
+            #handle error if photo has no lat/long
+            except AttributeError:
+                pass
+    #handle error if user has whole profile private
     except InstagramAPIError as e:
-        print "User is set to private."
-    # error if photo has no lat/long in photo
-    except AttributeError:
-        print "User's photo doesn't have lat/long."
+        print "\nUser is set to private."
     """
+    #this error shouldn't be encountered anymore
     except IndexError:
         #TODO: Avoid IndexError with while loop
         pass
