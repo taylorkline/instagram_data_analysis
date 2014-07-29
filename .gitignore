@@ -2,9 +2,8 @@
 keys
 
 #output file
-LatLongData/
-*.html
-*.data
+html_output/*
+LatLongData/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
