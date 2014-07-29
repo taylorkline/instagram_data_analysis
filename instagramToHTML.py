@@ -4,12 +4,12 @@
 # Setting variables in ALL_CAPS is your responsibility.
 from instagram.client import InstagramAPI
 from geopy.geocoders import GoogleV3
-import webbrowser
 import os
 import errno
-import sys
+from sys import exit
 from time import sleep
 from time import localtime
+from webbrowser import open_new_tab
 
 # reads access token from specified line in keyFile
 ACCESS_TOKEN_LINE=1
@@ -29,9 +29,10 @@ DISTANCE=100 # Radial distance (in meters) to search from lat/long origin
 # Max number of pictures to find at specific destination
 # the max number of results possible is 80
 MAXRESULTS=80 
-# Number of nearby locations to find and how many recent pictures to look for
+
+# how many recent pictures to look for in nearby locations
 # Keep this one low or risk rate limiting
-PERLOCATION=3
+PERLOCATION=16
 FOURSQUAREID="" # Foursquare ID of landmark (can leave blank to skip search)
 
 try: 
@@ -41,7 +42,7 @@ except Exception:
     print ("Please check your internet connection or retry with a new landmark or specific, valid"
        " address from Google Maps.")
     sleep(2)
-    sys.exit()
+    exit()
 
 # output file to be used for html output and opened in web browser
 currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
@@ -96,10 +97,18 @@ def findMediaAtLocation(locationResults):
         while nextURL and (len(totalFollowers) < PERLOCATION):
             recentMedia, nextURL = api.location_recent_media(count=(PERLOCATION - len(totalFollowers)),
                     location_id=eachLocation.id, with_next_url=nextURL)
-            totalFollowers += recentMedia
+
+            # location_recent_media is returning too many results, narrow if necessary
+            if (len(totalFollowers) + len(recentMedia)) < PERLOCATION:
+                totalFollowers += recentMedia
+            else:
+                additional = PERLOCATION - len(totalFollowers)
+                for each in range(0, additional):
+                    totalFollowers.append(recentMedia[each])
             sleep(1)
 
-        assert len(totalFollowers) < PERLOCATION
+        assert len(totalFollowers) <= PERLOCATION
+
         print str(len(totalFollowers)) + " pictures found at location."
         sleep(2)
 
@@ -140,4 +149,4 @@ findMediaAtLocation(searchResults)
 
 #Conclude the file and open it
 outputFile.write("</body>\n</html>")
-webbrowser.open_new_tab("file://" + outputFileLocation)
+open_new_tab("file://" + outputFileLocation)
