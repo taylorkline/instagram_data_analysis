@@ -21,9 +21,9 @@ access_token = keyFile.readline().rstrip()
 
 # user specified variables to influence search
 USERNAME = 'thelinq'
-MAXPAGES = 1 #maximum number of approximately 100-user pages to process
+MAXPAGES = 10 #maximum number of approximately 100-user pages to process
 # Note: This number is approximate, as some pages do not have the full 100 users
-MAXTRIES = 2 #number of pictures to go through on users' timelines to attempt to find location
+MAXTRIES = 10 #number of pictures to go through on users' timelines to attempt to find location
 #upper limit is 20 pictures to go through
 
 # output file to be used for html output and opened in web browser
@@ -88,7 +88,12 @@ def concludeOutput():
 
 # copy the .js data file into leaflet source folder
 def copyIntoLeaflet(leafletDirectory):
-    copytree(workingDirectory + '/leaflet_source/',leafletDirectory)
+    print "\nCreating a leaflet heatmap for " + USERNAME
+    try:
+        copytree(workingDirectory + '/leaflet_source/',leafletDirectory)
+    except OSError:
+        print "Leaflet heatmap for " + USERNAME + " appears to already exist."
+        print "Overwriting heatmap-data with newly gathered heatmap-data."
     print "\nCopying heatmap data to Leaflet directory:\n" + leafletDirectory
     copy2(outputFile.name, leafletDirectory + 'maps/' + "heatmap-data.js")
     
@@ -130,5 +135,3 @@ print "\nSaved lat/long data to file:\n" + outputFile.name
 # open leaflet heatmap
 heatmapLocation = leafletDirectory + 'maps/heatmap.html'
 open_new_tab("file://" + heatmapLocation)
-#TODO: Make new leaflet directory by location name
-#e.g. lflt-TheLinq
