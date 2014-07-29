@@ -4,6 +4,7 @@ keys
 #output file
 html_output/*
 LatLongData/*
+leaflet-*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
