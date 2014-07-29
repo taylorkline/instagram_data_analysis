@@ -8,6 +8,7 @@ import os
 import errno
 from time import sleep
 from time import localtime
+from shutil import copy2
 
 # reads access token from specified line in keyFile
 ACCESS_TOKEN_LINE=1
@@ -19,9 +20,9 @@ access_token = keyFile.readline().rstrip()
 
 # user specified variables to influence search
 USERNAME = 'thelinq'
-MAXPAGES = 10 #maximum number of approximately 100-user pages to process
+MAXPAGES = 1 #maximum number of approximately 100-user pages to process
 # Note: This number is approximate, as some pages do not have the full 100 users
-MAXTRIES = 5 #number of pictures to go through on users' timelines to attempt to find location
+MAXTRIES = 2 #number of pictures to go through on users' timelines to attempt to find location
 #upper limit is 20 pictures to go through
 
 # output file to be used for html output and opened in web browser
@@ -93,6 +94,12 @@ def concludeOutput():
     outputFile.write("\n}\n];")
     outputFile.close()
 
+# copy the .js data file into leaflet source folder
+def copyIntoLeaflet():
+    leafletMapsDirectory = os.path.dirname(os.path.realpath(__file__)) + '/leaflet_source/maps/'
+    print "Copying heatmap data to Leaflet directory:\n" + leafletMapsDirectory
+    copy2(outputFile.name, leafletMapsDirectory + "heatmap-data.js")
+    
 initiateOutput()
 
 # Determines the userID from the username given
@@ -121,4 +128,6 @@ print str(publicUsers) + " followers have location enabled (" + str(percentage) 
 
 concludeOutput()
 
-print "Saving lat/long data to file:\n" + outputFile.name
+copyIntoLeaflet()
+
+print "\nSaved lat/long data to file:\n" + outputFile.name
