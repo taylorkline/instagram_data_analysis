@@ -21,10 +21,13 @@ access_token = keyFile.readline().rstrip()
 
 # user specified variables to influence search
 USERNAME = 'thelinq'
-MAXPAGES = 10 #maximum number of approximately 100-user pages to process
+MAXPAGES = 5 #maximum number of approximately 100-user pages to process
 # Note: This number is approximate, as some pages do not have the full 100 users
-MAXTRIES = 10 #number of pictures to go through on users' timelines to attempt to find location
+MAXTRIES = 7 #number of pictures to go through on users' timelines to attempt to find location
 #upper limit is 20 pictures to go through
+
+#Slow down the search to attempt to avoid rate limit?
+SLEEPMODE = False
 
 # output file to be used for html output and opened in web browser
 currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
@@ -62,19 +65,40 @@ def getLastLocation(userID):
                 break
             print "Checking for location in feed: " + str(eachMedia)
             try:
-                print "Found location: " + str(api.media(eachMedia.id).location.point)
-                #Conclude the last entry and prepare for the next
-                if (publicUsers > 0):
-                    outputFile.write("\n},")
-                outputFile.write("\n{\n\tlat: " + str(api.media(eachMedia.id).location.point.latitude) + 
-                        ",\n\tlon: " + str(api.media(eachMedia.id).location.point.longitude) + ",\n\t" +
-                        "value: 1")
-                publicUsers += 1
-                break
+                #TODO: Use username or delete
+                username = eachMedia.user.username
+                userPoint = api.media(eachMedia.id).location.point
+                userLat = userPoint.latitude
+                userLong = userPoint.longitude
+
+                #Sometimes a valid, yet empty, point is returned with value "none." Treat as error.
+                #TODO: Test this. Look for error between:
+                """
+                lat: 33.921651079,
+                lon: -118.192025816,
+                value: 1
+                -and-
+                lat: 34.04183113,
+                lon: -118.256828035,
+                value: 1
+                between: 42-44
+                """
+                if not userPoint: raise(AttributeError)
+                else:
+                    print "Found location: " + str(userPoint)
+                    #Conclude the last entry and prepare for the next
+                    if (publicUsers > 0):
+                        print publicUsers
+                        outputFile.write("\n},")
+                    outputFile.write("\n{\n\tlat: " + str(userLat) + 
+                            ",\n\tlon: " + str(userLong) + ",\n\t" +
+                            "value: 1")
+                    publicUsers += 1
+                    break
             #handle error if media has no lat/long
             except AttributeError:
                 pass
-            sleep(2)
+            if SLEEPMODE: sleep(2)
             tries += 1
     #handle error if user has whole profile private
     except InstagramAPIError as e:
@@ -95,7 +119,7 @@ def copyIntoLeaflet(leafletDirectory):
         print "Leaflet heatmap for " + USERNAME + " appears to already exist."
         print "Overwriting heatmap-data with newly gathered heatmap-data."
     print "\nCopying heatmap data to Leaflet directory:\n" + leafletDirectory
-    copy2(outputFile.name, leafletDirectory + 'maps/' + "heatmap-data.js")
+    copy2(outputFile.name, leafletDirectory + "heatmap-data.js")
     
 initiateOutput()
 
@@ -113,13 +137,14 @@ while nextURL and counter < (MAXPAGES): #paginate until there are no more URLs o
     counter += 1
 totalFollowers = tuple(totalFollowers) #convert back to immutable tuple
 print "Found " + str(len(totalFollowers)) + " followers."
+#TODO: Say "out of xxxx followers"
 print "Finding most recent Lat/Long of each follower."
 sleep(4)
 
 # Now that we've got the followers, find their most recent photo
 for eachFollower in totalFollowers:
     getLastLocation(eachFollower.id)
-    sleep(2)
+    if SLEEPMODE: sleep(2)
 percentage = int(round(float(publicUsers) / len(totalFollowers) * 100))
 print
 print str(publicUsers) + " followers have location enabled (" + str(percentage) + "%) and " \
@@ -133,5 +158,5 @@ copyIntoLeaflet(leafletDirectory)
 print "\nSaved lat/long data to file:\n" + outputFile.name
 
 # open leaflet heatmap
-heatmapLocation = leafletDirectory + 'maps/heatmap.html'
+heatmapLocation = leafletDirectory + 'heatmap.html'
 open_new_tab("file://" + heatmapLocation)
