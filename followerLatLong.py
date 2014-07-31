@@ -49,6 +49,7 @@ publicUsers = 0
 
 # initiates the .js data file
 def initiateOutput():
+    outputFile.write("var user = \"" + USERNAME + "\";")
     outputFile.write("var heatmapData = [")
 
 # accepts a userID and gets the last location of the user based on recent photo, if available

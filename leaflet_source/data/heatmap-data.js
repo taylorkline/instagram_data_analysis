@@ -1,3 +1,4 @@
+var user = "billgates"
 var heatmapData = [
 {
 	lat: 36.060239756,

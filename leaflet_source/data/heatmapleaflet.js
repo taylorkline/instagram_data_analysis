@@ -20,7 +20,19 @@ var heatmapLayer = new L.DivHeatmapLayer(
          radius: 20
       });
 
-//Load heatmap data from a .js file
-heatmapLayer.setData(heatmapData);
+/* Load heatmap data from a .js file */
+heatmapLayer.setData(heatmapData); //heatmap data defined by external js file
 
 heatmapLayer.addTo(map);
+
+/* Create a legend */
+var legend = L.control({position: 'topright'});
+
+legend.onAdd = function (map) {
+   var div = L.DomUtil.create('div','info legend');
+   div.innerHTML += "<b>Followers of " + user + "</b>"; //user defined by external js file
+   return div;
+   //TODO: Figure out what CSS will do for me.
+};
+
+legend.addTo(map);
