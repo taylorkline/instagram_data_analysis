@@ -15,13 +15,11 @@ L.tileLayer('https://{s}.tiles.mapbox.com/v3/' + mapID + '/{z}/{x}/{y}.png', {
       maxZoom: 18
       }).addTo(map);
 
-var heatmapLayer = new L.DivHeatmapLayer(
+var heatmapLayer = new L.heatLayer(
+      latlngs,
       {
          radius: 20
       });
-
-/* Load heatmap data from a .js file */
-heatmapLayer.setData(heatmapData); //heatmap data defined by external js file
 
 heatmapLayer.addTo(map);
 

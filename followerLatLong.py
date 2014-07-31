@@ -103,7 +103,7 @@ def createDataFile(extension):
 # initiates the .js data file
 def initiateOutput(outputJS):
     outputJS.write("var user = \"" + USERNAME + "\";\n")
-    outputJS.write("var heatmapData = [")
+    outputJS.write("var latlngs = [")
 
 # accepts a userID and gets the last location of the user based on recent photo, if available
 def saveLastLocation(outputJS, outputCSV, userID):
@@ -131,10 +131,9 @@ def saveLastLocation(outputJS, outputCSV, userID):
                     #Conclude the last entry and prepare for the next
                     outputCSV.write(username + ", " + str(userLat) + ", " + str(userLong) +"\n")
                     if (publicUsers > 0):
-                        outputJS.write("\n},")
-                    outputJS.write("\n{\n\tlat: " + str(userLat) + 
-                            ",\n\tlon: " + str(userLong) + ",\n\t" +
-                            "value: 1")
+                        outputJS.write(",")
+                    outputJS.write("\n[" + str(userLat) + 
+                            ", " + str(userLong) + "]")
                     publicUsers += 1
                     break
             #handle error if media has no lat/long
@@ -148,7 +147,7 @@ def saveLastLocation(outputJS, outputCSV, userID):
 
 # concludes the .js data file
 def concludeOutput(outputJS, outputCSV):
-    outputJS.write("\n}\n];\n")
+    outputJS.write("\n];\n")
     outputJS.write("var usersFound = \"" + str(publicUsers) + "\";\n")
     outputJS.close()
     outputCSV.close()
