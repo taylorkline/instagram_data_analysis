@@ -31,15 +31,19 @@ SLEEPMODE = False
 
 # output file to be used for html output and opened in web browser
 currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
-outputFilename = 'output_' + USERNAME + '_' + currentTime +  '.js'
 workingDirectory = os.path.dirname(os.path.realpath(__file__))
+outputJSpath = workingDirectory + '/LatLongData/JS'
+outputJSname = 'output_' + USERNAME + '_' + currentTime +  '.js'
+outputCSVpath = workingDirectory + '/LatLongData/csv'
+outputCSVname = 'output_' + USERNAME + '_' + currentTime +  '.csv'
 outputDirectory = workingDirectory + '/LatLongData/'
 try:
-        os.makedirs(outputDirectory)
+        os.makedirs(outputJSpath)
+        os.makedirs(outputCSVpath)
 except OSError as exception:
-    if exception.errno != errno.EEXIST:
-        raise
-outputFile = open(os.path.join(outputDirectory, outputFilename), 'w')
+    if exception.errno != errno.EEXIST: raise
+outputJS = open(os.path.join(outputJSpath,outputJSname), 'w')
+outputCSV = open(os.path.join(outputCSVpath,outputCSVname), 'w')
 
 # initiate the api
 api = InstagramAPI(access_token=access_token)
@@ -49,8 +53,8 @@ publicUsers = 0
 
 # initiates the .js data file
 def initiateOutput():
-    outputFile.write("var user = \"" + USERNAME + "\";")
-    outputFile.write("var heatmapData = [")
+    outputJS.write("var user = \"" + USERNAME + "\";")
+    outputJS.write("var heatmapData = [")
 
 # accepts a userID and gets the last location of the user based on recent photo, if available
 def getLastLocation(userID):
@@ -66,8 +70,6 @@ def getLastLocation(userID):
                 break
             print "Checking for location in feed: " + str(eachMedia)
             try:
-                #TODO: Use username or delete
-                #TODO: CSV file
                 username = eachMedia.user.username
                 userPoint = api.media(eachMedia.id).location.point
                 userLat = userPoint.latitude
@@ -78,10 +80,10 @@ def getLastLocation(userID):
                 else:
                     print "Found location: " + str(userPoint)
                     #Conclude the last entry and prepare for the next
+                    outputCSV.write(username + ", " + str(userLat) + ", " + str(userLong) +"\n")
                     if (publicUsers > 0):
-                        print publicUsers
-                        outputFile.write("\n},")
-                    outputFile.write("\n{\n\tlat: " + str(userLat) + 
+                        outputJS.write("\n},")
+                    outputJS.write("\n{\n\tlat: " + str(userLat) + 
                             ",\n\tlon: " + str(userLong) + ",\n\t" +
                             "value: 1")
                     publicUsers += 1
@@ -97,8 +99,10 @@ def getLastLocation(userID):
 
 # concludes the .js data file
 def concludeOutput():
-    outputFile.write("\n}\n];")
-    outputFile.close()
+    outputJS.write("\n}\n];")
+    outputJS.write("var usersFound = \"" + str(publicUsers) + "\";")
+    outputJS.close()
+    outputCSV.close()
 
 # copy the .js data file into leaflet source folder
 def copyIntoLeaflet(leafletDirectory):
@@ -109,7 +113,7 @@ def copyIntoLeaflet(leafletDirectory):
         print "Leaflet heatmap for " + USERNAME + " appears to already exist."
         print "Overwriting heatmap-data with newly gathered heatmap-data."
     print "\nCopying heatmap data to Leaflet directory:\n" + leafletDirectory
-    copy2(outputFile.name, leafletDirectory + "/data/heatmap-data.js")
+    copy2(outputJS.name, leafletDirectory + "/data/heatmap-data.js")
     
 initiateOutput()
 
@@ -137,6 +141,7 @@ for eachFollower in totalFollowers:
     if SLEEPMODE: sleep(2)
 percentage = int(round(float(publicUsers) / len(totalFollowers) * 100))
 print
+print "==============================================="
 print str(publicUsers) + " followers have location enabled (" + str(percentage) + "%) and " \
         + str(len(totalFollowers) - publicUsers) + " followers have no location."
 
@@ -145,7 +150,8 @@ concludeOutput()
 leafletDirectory = workingDirectory + '/leaflet-' + USERNAME + '/'
 copyIntoLeaflet(leafletDirectory)
 
-print "\nSaved lat/long data to file:\n" + outputFile.name
+print "\nSaved heatmap lat/long data to file:\n" + outputJS.name
+print "\nSaved lat/long CSV data to file:\n" + outputCSV.name
 
 # open leaflet heatmap
 heatmapLocation = leafletDirectory + 'heatmap.html'

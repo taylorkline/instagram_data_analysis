@@ -30,7 +30,7 @@ var legend = L.control({position: 'topright'});
 
 legend.onAdd = function (map) {
    var div = L.DomUtil.create('div','info');
-   div.innerHTML += "Followers of <b>" + user + "</b>"; //user defined by external js file
+   div.innerHTML += usersFound + " followers of <b>" + user + "</b>"; //user defined by external js file
    return div;
 };
 
