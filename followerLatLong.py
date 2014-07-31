@@ -16,9 +16,9 @@ ACCESS_TOKEN_LINE=1
 
 # user specified variables to influence search
 USERNAME = 'thelinq'
-MAXPAGES = 1 #maximum number of approximately 100-user pages to process
+MAXPAGES = 21 #maximum number of approximately 100-user pages to process
 # Note: This number is approximate, as some pages do not have the full 100 users
-MAXTRIES = 1 #number of pictures to go through on users' timelines to attempt to find location
+MAXTRIES = 8 #number of pictures to go through on users' timelines to attempt to find location
 #upper limit is 20 pictures to go through
 
 #Slow down the search to attempt to avoid rate limit?
