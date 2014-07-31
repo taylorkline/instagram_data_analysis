@@ -24,19 +24,6 @@ MAXTRIES = 1 #number of pictures to go through on users' timelines to attempt to
 #Slow down the search to attempt to avoid rate limit?
 SLEEPMODE = False
 
-# output file to be used for html output and opened in web browser
-def createDataFile(extension):
-    currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
-    workingDirectory = os.path.dirname(os.path.realpath(__file__))
-    outputPath = workingDirectory + '/LatLongData/' + extension
-    outputName = 'output_' + USERNAME + '_' + currentTime +  '.' + extension
-    outputDirectory = workingDirectory + '/LatLongData/'
-    try:
-            os.makedirs(outputPath)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST: raise
-    return open(os.path.join(outputPath,outputName), 'w')
-
 # track how many users we could get location from
 publicUsers = 0
 
@@ -100,6 +87,18 @@ def initiateAPI():
     global api
     api = InstagramAPI(access_token=access_token)
 
+# output file to be used for html output and opened in web browser
+def createDataFile(extension):
+    currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
+    workingDirectory = os.path.dirname(os.path.realpath(__file__))
+    outputPath = workingDirectory + '/LatLongData/' + extension
+    outputName = 'output_' + USERNAME + '_' + currentTime +  '.' + extension
+    outputDirectory = workingDirectory + '/LatLongData/'
+    try:
+            os.makedirs(outputPath)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST: raise
+    return open(os.path.join(outputPath,outputName), 'w')
 
 # initiates the .js data file
 def initiateOutput(outputJS):
