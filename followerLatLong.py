@@ -13,11 +13,6 @@ from webbrowser import open_new_tab
 
 # reads access token from specified line in keyFile
 ACCESS_TOKEN_LINE=1
-keyFilename = 'keys'
-keyFile = open(keyFilename, 'r')
-for x in range (0,ACCESS_TOKEN_LINE-1):
-    keyFile.readline()
-access_token = keyFile.readline().rstrip()
 
 # user specified variables to influence search
 USERNAME = 'thelinq'
@@ -30,34 +25,89 @@ MAXTRIES = 1 #number of pictures to go through on users' timelines to attempt to
 SLEEPMODE = False
 
 # output file to be used for html output and opened in web browser
-currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
-workingDirectory = os.path.dirname(os.path.realpath(__file__))
-outputJSpath = workingDirectory + '/LatLongData/JS'
-outputJSname = 'output_' + USERNAME + '_' + currentTime +  '.js'
-outputCSVpath = workingDirectory + '/LatLongData/csv'
-outputCSVname = 'output_' + USERNAME + '_' + currentTime +  '.csv'
-outputDirectory = workingDirectory + '/LatLongData/'
-try:
-        os.makedirs(outputJSpath)
-        os.makedirs(outputCSVpath)
-except OSError as exception:
-    if exception.errno != errno.EEXIST: raise
-outputJS = open(os.path.join(outputJSpath,outputJSname), 'w')
-outputCSV = open(os.path.join(outputCSVpath,outputCSVname), 'w')
-
-# initiate the api
-api = InstagramAPI(access_token=access_token)
+def createDataFile(extension):
+    currentTime = str(localtime().tm_year) + '-' + str(localtime().tm_mon) + '-' + str(localtime().tm_mday) + '-' + str(localtime().tm_hour) + '-' + str(localtime().tm_sec)
+    workingDirectory = os.path.dirname(os.path.realpath(__file__))
+    outputPath = workingDirectory + '/LatLongData/' + extension
+    outputName = 'output_' + USERNAME + '_' + currentTime +  '.' + extension
+    outputDirectory = workingDirectory + '/LatLongData/'
+    try:
+            os.makedirs(outputPath)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST: raise
+    return open(os.path.join(outputPath,outputName), 'w')
 
 # track how many users we could get location from
 publicUsers = 0
 
+def main():
+    initiateAPI()
+
+    # generate files for writing
+    outputJS = createDataFile("js")
+    outputCSV = createDataFile("csv")
+
+    initiateOutput(outputJS)
+
+    # Determines the userID from the username given
+    userID = api.user_search(USERNAME)[0].id
+
+    # Get each follower of the user
+    followers, nextURL = api.user_followed_by(count = 100, user_id=userID) #count max is 100
+    totalFollowers = list(followers)
+    counter = 1
+
+    while nextURL and counter < (MAXPAGES): #paginate until there are no more URLs or counter limit is hit
+        followers, nextURL = api.user_followed_by(count = 100, user_id=userID, with_next_url=nextURL)
+        totalFollowers += list(followers)
+        counter += 1
+    totalFollowers = tuple(totalFollowers) #convert back to immutable tuple
+    print "Found " + str(len(totalFollowers)) + " followers."
+    #Note: not possible to say "out of xxxx followers"
+
+    # Now that we've got the followers, find their most recent photo
+    print "Finding most recent Lat/Long of each follower."
+    sleep(4)
+    for eachFollower in totalFollowers:
+        saveLastLocation(outputJS, outputCSV, eachFollower.id)
+        if SLEEPMODE: sleep(2)
+    percentage = int(round(float(publicUsers) / len(totalFollowers) * 100))
+    print
+    print "==============================================="
+    print str(publicUsers) + " followers have location enabled (" + str(percentage) + "%) and " \
+            + str(len(totalFollowers) - publicUsers) + " followers have no location."
+
+    concludeOutput(outputJS, outputCSV)
+
+    workingDirectory = os.path.dirname(os.path.realpath(__file__))
+    leafletDirectory = workingDirectory + '/leaflet-' + USERNAME + '/'
+    copyIntoLeaflet(outputJS, leafletDirectory)
+
+    print "\nSaved heatmap lat/long data to file:\n" + outputJS.name
+    print "\nSaved lat/long CSV data to file:\n" + outputCSV.name
+
+    # open leaflet heatmap
+    heatmapLocation = leafletDirectory + 'heatmap.html'
+    open_new_tab("file://" + heatmapLocation)
+
+# initiates API from specified line in keyFile
+def initiateAPI():
+    keyFilename = 'keys'
+    keyFile = open(keyFilename, 'r')
+    for x in range (0,ACCESS_TOKEN_LINE-1):
+        keyFile.readline()
+    access_token = keyFile.readline().rstrip()
+    global api
+    api = InstagramAPI(access_token=access_token)
+
+
 # initiates the .js data file
-def initiateOutput():
+def initiateOutput(outputJS):
     outputJS.write("var user = \"" + USERNAME + "\";")
     outputJS.write("var heatmapData = [")
 
 # accepts a userID and gets the last location of the user based on recent photo, if available
-def getLastLocation(userID):
+def saveLastLocation(outputJS, outputCSV, userID):
     global publicUsers
     try:
         userFeed = api.user_recent_media(user_id=userID)[0]
@@ -98,16 +148,17 @@ def getLastLocation(userID):
         print "\nUser is set to private."
 
 # concludes the .js data file
-def concludeOutput():
+def concludeOutput(outputJS, outputCSV):
     outputJS.write("\n}\n];")
     outputJS.write("var usersFound = \"" + str(publicUsers) + "\";")
     outputJS.close()
     outputCSV.close()
 
 # copy the .js data file into leaflet source folder
-def copyIntoLeaflet(leafletDirectory):
+def copyIntoLeaflet(outputJS, leafletDirectory):
     print "\nCreating a leaflet heatmap for " + USERNAME
     try:
+        workingDirectory = os.path.dirname(os.path.realpath(__file__))
         copytree(workingDirectory + '/leaflet_source/',leafletDirectory)
     except OSError:
         print "Leaflet heatmap for " + USERNAME + " appears to already exist."
@@ -115,44 +166,5 @@ def copyIntoLeaflet(leafletDirectory):
     print "\nCopying heatmap data to Leaflet directory:\n" + leafletDirectory
     copy2(outputJS.name, leafletDirectory + "/data/heatmap-data.js")
     
-initiateOutput()
-
-# Determines the userID from the username given
-userID = api.user_search(USERNAME)[0].id
-
-# Get each follower of the user
-followers, nextURL = api.user_followed_by(count = 100, user_id=userID) #count max is 100
-totalFollowers = list(followers)
-counter = 1
-
-while nextURL and counter < (MAXPAGES): #paginate until there are no more URLs or counter limit is hit
-    followers, nextURL = api.user_followed_by(count = 100, user_id=userID, with_next_url=nextURL)
-    totalFollowers += list(followers)
-    counter += 1
-totalFollowers = tuple(totalFollowers) #convert back to immutable tuple
-print "Found " + str(len(totalFollowers)) + " followers."
-#Note: not possible to say "out of xxxx followers"
-print "Finding most recent Lat/Long of each follower."
-sleep(4)
-
-# Now that we've got the followers, find their most recent photo
-for eachFollower in totalFollowers:
-    getLastLocation(eachFollower.id)
-    if SLEEPMODE: sleep(2)
-percentage = int(round(float(publicUsers) / len(totalFollowers) * 100))
-print
-print "==============================================="
-print str(publicUsers) + " followers have location enabled (" + str(percentage) + "%) and " \
-        + str(len(totalFollowers) - publicUsers) + " followers have no location."
-
-concludeOutput()
-
-leafletDirectory = workingDirectory + '/leaflet-' + USERNAME + '/'
-copyIntoLeaflet(leafletDirectory)
-
-print "\nSaved heatmap lat/long data to file:\n" + outputJS.name
-print "\nSaved lat/long CSV data to file:\n" + outputCSV.name
-
-# open leaflet heatmap
-heatmapLocation = leafletDirectory + 'heatmap.html'
-open_new_tab("file://" + heatmapLocation)
+if __name__ == "__main__":
+    main()
