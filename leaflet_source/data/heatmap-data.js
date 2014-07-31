@@ -1,4 +1,4 @@
-var user = "billgates"
+var user = "billgates";
 var heatmapData = [
 {
 	lat: 36.060239756,
@@ -6,3 +6,4 @@ var heatmapData = [
 	value: 1
 }
 ];
+var usersFound = "1";

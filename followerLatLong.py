@@ -102,7 +102,7 @@ def createDataFile(extension):
 
 # initiates the .js data file
 def initiateOutput(outputJS):
-    outputJS.write("var user = \"" + USERNAME + "\";")
+    outputJS.write("var user = \"" + USERNAME + "\";\n")
     outputJS.write("var heatmapData = [")
 
 # accepts a userID and gets the last location of the user based on recent photo, if available
@@ -148,8 +148,8 @@ def saveLastLocation(outputJS, outputCSV, userID):
 
 # concludes the .js data file
 def concludeOutput(outputJS, outputCSV):
-    outputJS.write("\n}\n];")
-    outputJS.write("var usersFound = \"" + str(publicUsers) + "\";")
+    outputJS.write("\n}\n];\n")
+    outputJS.write("var usersFound = \"" + str(publicUsers) + "\";\n")
     outputJS.close()
     outputCSV.close()
 
