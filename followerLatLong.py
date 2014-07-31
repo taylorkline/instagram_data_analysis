@@ -67,23 +67,13 @@ def getLastLocation(userID):
             print "Checking for location in feed: " + str(eachMedia)
             try:
                 #TODO: Use username or delete
+                #TODO: CSV file
                 username = eachMedia.user.username
                 userPoint = api.media(eachMedia.id).location.point
                 userLat = userPoint.latitude
                 userLong = userPoint.longitude
 
                 #Sometimes a valid, yet empty, point is returned with value "none." Treat as error.
-                #TODO: Test this. Look for error between:
-                """
-                lat: 33.921651079,
-                lon: -118.192025816,
-                value: 1
-                -and-
-                lat: 34.04183113,
-                lon: -118.256828035,
-                value: 1
-                between: 42-44
-                """
                 if not userPoint: raise(AttributeError)
                 else:
                     print "Found location: " + str(userPoint)
@@ -109,7 +99,6 @@ def getLastLocation(userID):
 def concludeOutput():
     outputFile.write("\n}\n];")
     outputFile.close()
-    #TODO: Add some legend data to the map
 
 # copy the .js data file into leaflet source folder
 def copyIntoLeaflet(leafletDirectory):
@@ -138,7 +127,7 @@ while nextURL and counter < (MAXPAGES): #paginate until there are no more URLs o
     counter += 1
 totalFollowers = tuple(totalFollowers) #convert back to immutable tuple
 print "Found " + str(len(totalFollowers)) + " followers."
-#TODO: Say "out of xxxx followers"
+#Note: not possible to say "out of xxxx followers"
 print "Finding most recent Lat/Long of each follower."
 sleep(4)
 
