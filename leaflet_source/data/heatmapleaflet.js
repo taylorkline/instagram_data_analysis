@@ -29,10 +29,9 @@ heatmapLayer.addTo(map);
 var legend = L.control({position: 'topright'});
 
 legend.onAdd = function (map) {
-   var div = L.DomUtil.create('div','info legend');
+   var div = L.DomUtil.create('div','info');
    div.innerHTML += "<b>Followers of " + user + "</b>"; //user defined by external js file
    return div;
-   //TODO: Figure out what CSS will do for me.
 };
 
 legend.addTo(map);
