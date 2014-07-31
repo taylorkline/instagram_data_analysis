@@ -21,9 +21,9 @@ access_token = keyFile.readline().rstrip()
 
 # user specified variables to influence search
 USERNAME = 'thelinq'
-MAXPAGES = 5 #maximum number of approximately 100-user pages to process
+MAXPAGES = 1 #maximum number of approximately 100-user pages to process
 # Note: This number is approximate, as some pages do not have the full 100 users
-MAXTRIES = 7 #number of pictures to go through on users' timelines to attempt to find location
+MAXTRIES = 1 #number of pictures to go through on users' timelines to attempt to find location
 #upper limit is 20 pictures to go through
 
 #Slow down the search to attempt to avoid rate limit?
@@ -119,7 +119,7 @@ def copyIntoLeaflet(leafletDirectory):
         print "Leaflet heatmap for " + USERNAME + " appears to already exist."
         print "Overwriting heatmap-data with newly gathered heatmap-data."
     print "\nCopying heatmap data to Leaflet directory:\n" + leafletDirectory
-    copy2(outputFile.name, leafletDirectory + "heatmap-data.js")
+    copy2(outputFile.name, leafletDirectory + "/data/heatmap-data.js")
     
 initiateOutput()
 
