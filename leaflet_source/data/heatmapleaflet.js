@@ -30,7 +30,9 @@ var legend = L.control({position: 'topright'});
 
 legend.onAdd = function (map) {
    var div = L.DomUtil.create('div','info');
-   div.innerHTML += usersFound + " followers of <b>" + user + "</b>"; //user defined by external js file
+   //user defined by external js file
+   div.innerHTML += usersFound + " followers of <b><a target=\"_blank\""
+      + "href=\"http://instagram.com/" + user + "\">" + user + "</a></b>"; 
    return div;
 };
 

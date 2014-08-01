@@ -16,7 +16,7 @@ ACCESS_TOKEN_LINE=1
 
 # user specified variables to influence search
 USERNAME = 'thelinq'
-MAXPAGES = 21 #maximum number of approximately 100-user pages to process
+MAXPAGES = 20 #maximum number of approximately 100-user pages to process
 # Note: This number is approximate, as some pages do not have the full 100 users
 MAXTRIES = 8 #number of pictures to go through on users' timelines to attempt to find location
 #upper limit is 20 pictures to go through
@@ -30,14 +30,14 @@ publicUsers = 0
 def main():
     initiateAPI()
 
+    # Determines the userID from the username given
+    userID = api.user_search(USERNAME)[0].id
+
     # generate files for writing
     outputJS = createDataFile("js")
     outputCSV = createDataFile("csv")
 
-    initiateOutput(outputJS)
-
-    # Determines the userID from the username given
-    userID = api.user_search(USERNAME)[0].id
+    initiateOutput(userID, outputJS)
 
     # Get each follower of the user
     followers, nextURL = api.user_followed_by(count = 100, user_id=userID) #count max is 100
@@ -101,8 +101,9 @@ def createDataFile(extension):
     return open(os.path.join(outputPath,outputName), 'w')
 
 # initiates the .js data file
-def initiateOutput(outputJS):
-    outputJS.write("var user = \"" + USERNAME + "\";\n")
+def initiateOutput(userID, outputJS):
+    user = api.user(userID).username
+    outputJS.write("var user = \"" + user + "\";\n")
     outputJS.write("var heatmapData = [")
 
 # accepts a userID and gets the last location of the user based on recent photo, if available
@@ -144,7 +145,10 @@ def saveLastLocation(outputJS, outputCSV, userID):
             tries += 1
     #handle error if user has whole profile private
     except InstagramAPIError as e:
-        print "\nUser is set to private."
+        if (e.status_code == 400):
+            print "\nUser is set to private."
+        else:
+            raise
 
 # concludes the .js data file
 def concludeOutput(outputJS, outputCSV):
