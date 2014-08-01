@@ -6,6 +6,7 @@ from instagram.client import InstagramAPI
 from instagram.bind import InstagramAPIError
 import os
 import errno
+import httplib
 from time import sleep
 from time import localtime
 from shutil import copy2,copytree
@@ -16,9 +17,9 @@ ACCESS_TOKEN_LINE=1
 
 # user specified variables to influence search
 USERNAME = 'thelinq'
-MAXPAGES = 20 #maximum number of approximately 100-user pages to process
+MAXPAGES = 19 #maximum number of approximately 100-user pages to process
 # Note: This number is approximate, as some pages do not have the full 100 users
-MAXTRIES = 8 #number of pictures to go through on users' timelines to attempt to find location
+MAXTRIES = 7 #number of pictures to go through on users' timelines to attempt to find location
 #upper limit is 20 pictures to go through
 
 #Slow down the search to attempt to avoid rate limit?
@@ -57,7 +58,6 @@ def main():
     sleep(4)
     for eachFollower in totalFollowers:
         saveLastLocation(outputJS, outputCSV, eachFollower.id)
-        if SLEEPMODE: sleep(2)
     percentage = int(round(float(publicUsers) / len(totalFollowers) * 100))
     print
     print "==============================================="
@@ -137,11 +137,13 @@ def saveLastLocation(outputJS, outputCSV, userID):
                             ",\n\tlon: " + str(userLong) + ",\n\t" +
                             "value: 1")
                     publicUsers += 1
+                    outputCSV.flush()
+                    outputJS.flush()
                     break
             #handle error if media has no lat/long
             except AttributeError:
                 pass
-            if SLEEPMODE: sleep(2)
+            if SLEEPMODE: sleep(1)
             tries += 1
     #handle error if user has whole profile private
     except InstagramAPIError as e:
@@ -149,6 +151,9 @@ def saveLastLocation(outputJS, outputCSV, userID):
             print "\nUser is set to private."
         else:
             raise
+    #handle rare error with ResponseNotReady
+    except httplib.ResponseNotReady:
+        pass
 
 # concludes the .js data file
 def concludeOutput(outputJS, outputCSV):
