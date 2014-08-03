@@ -1,7 +1,7 @@
 # KEYS file
 keys
 
-#output file
+#output files
 html_output/*
 LatLongData/*
 leaflet-*/
