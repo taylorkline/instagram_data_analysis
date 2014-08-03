@@ -16,7 +16,7 @@ from webbrowser import open_new_tab
 ACCESS_TOKEN_LINE=1
 
 # user specified variables to influence search
-USERNAME = 'thelinq'
+USERNAME = 'github'
 MAXPAGES = 19 #maximum number of approximately 100-user pages to process
 # Note: This number is approximate, as some pages do not have the full 100 users
 MAXTRIES = 7 #number of pictures to go through on users' timelines to attempt to find location
