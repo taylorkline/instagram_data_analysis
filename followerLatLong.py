@@ -23,7 +23,7 @@ MAXTRIES = 7 #number of pictures to go through on users' timelines to attempt to
 #upper limit is 20 pictures to go through
 
 #Slow down the search to attempt to avoid rate limit?
-SLEEPMODE = False
+SLEEPMODE = True
 
 # track how many users we could get location from
 publicUsers = 0
@@ -149,6 +149,9 @@ def saveLastLocation(outputJS, outputCSV, userID):
     except InstagramAPIError as e:
         if (e.status_code == 400):
             print "\nUser is set to private."
+        #sometimes JSON screws up, proceed anyway
+        elif (e.status_code == 502):
+            pass
         else:
             raise
     #handle rare error with ResponseNotReady
