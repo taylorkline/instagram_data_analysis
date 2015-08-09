@@ -114,7 +114,7 @@ def findMediaAtLocation(locationResults):
 
         if len(totalFollowers) > 0:
             #Add in a divider for each location.
-            outputFile.write("<br><b>Nearby Location: " + eachLocation.name + ".</b><br>")
+            outputFile.write("<br><b>Nearby Location: " + eachLocation.name.encode('utf-8') + ".</b><br>")
 
             #Print the media to the html code
             for media in totalFollowers: #first element of tuple contains media
